@@ -48,7 +48,7 @@ function checkWinner() {
   }
 
   if (!boardState.includes('')) {
-    gameStatus.textContent = "It's a draw!";
+    gameStatus.textContent = "Cinese hai pareggiato come hai fatto!";
     gameActive = false;
   }
 }
