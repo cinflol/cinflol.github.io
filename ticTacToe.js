@@ -1,39 +1,10 @@
 const board = document.getElementById('board');
 const resetButton = document.getElementById('resetButton');
 const gameStatus = document.getElementById('gameStatus');
-const ws = new WebSocket('ws://localhost:8080'); // Connect to WebSocket server
 
-let boardState = ['', '', '', '', '', '', '', '', ''];
-let currentPlayer = '';
-let gameActive = false;
-let opponentPlayer = '';
-
-ws.onopen = () => {
-  gameStatus.textContent = 'Connected. Waiting for opponent...';
-};
-
-ws.onmessage = (event) => {
-  const message = JSON.parse(event.data);
-
-  if (message.message) {
-    gameStatus.textContent = message.message; // Display general status
-  }
-
-  if (message.type === 'start') {
-    boardState = message.boardState;
-    currentPlayer = message.currentPlayer;
-    gameActive = true;
-    createBoard();
-    gameStatus.textContent = `Player ${currentPlayer}'s turn`;
-  }
-
-  if (message.type === 'move') {
-    boardState[message.position] = opponentPlayer;
-    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-    gameStatus.textContent = `Player ${currentPlayer}'s turn`;
-    createBoard();
-  }
-};
+let boardState = ['', '', '', '', '', '', '', '', '']; // Empty board
+let currentPlayer = 'X';
+let gameActive = true;
 
 function createBoard() {
   board.innerHTML = '';
@@ -47,21 +18,50 @@ function createBoard() {
 }
 
 function handleCellClick(index) {
-  if (boardState[index] !== '' || !gameActive || currentPlayer !== 'X' && currentPlayer !== 'O') return;
+  if (boardState[index] !== '' || !gameActive) return;
 
   boardState[index] = currentPlayer;
-  ws.send(JSON.stringify({ type: 'move', position: index })); // Send move to server
+  checkWinner();
+  switchPlayer();
+  createBoard();
+}
+
+function switchPlayer() {
   currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
+  gameStatus.textContent = `Player ${currentPlayer}'s turn`;
+}
+
+function checkWinner() {
+  const winningCombinations = [
+    [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+    [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+    [0, 4, 8], [2, 4, 6], // Diagonals
+  ];
+
+  for (let i = 0; i < winningCombinations.length; i++) {
+    const [a, b, c] = winningCombinations[i];
+    if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+      gameStatus.textContent = `Player ${currentPlayer} wins!`;
+      gameActive = false;
+      return;
+    }
+  }
+
+  if (!boardState.includes('')) {
+    gameStatus.textContent = "It's a draw!";
+    gameActive = false;
+  }
+}
+
+function resetGame() {
+  boardState = ['', '', '', '', '', '', '', '', ''];
+  currentPlayer = 'X';
+  gameActive = true;
   gameStatus.textContent = `Player ${currentPlayer}'s turn`;
   createBoard();
 }
 
-resetButton.addEventListener('click', () => {
-  if (gameActive) {
-    boardState = ['', '', '', '', '', '', '', '', ''];
-    currentPlayer = 'X'; // Reset to 'X' starting
-    gameStatus.textContent = `Player ${currentPlayer}'s turn`;
-    createBoard();
-    ws.send(JSON.stringify({ type: 'reset' }));
-  }
-});
+resetButton.addEventListener('click', resetGame);
+
+// Initialize the board
+createBoard();
