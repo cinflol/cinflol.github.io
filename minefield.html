@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>w3school</title><!--sfondo nero come la persona che mi ha chiesto questo giochino-->
+    <style> 
+        :root { 
+            --background-color: #121212;
+            --text-color: #ffffff;
+            --accent-color: #ff5722;
+        }
+
+        body {
+            margin: 0;
+            height: 100vh;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            animation: fadeIn 2s ease-in-out;
+        }
+
+        .grid {
+            display: grid;
+            gap: 2px;
+            background-color: #333;
+            padding: 5px;
+            border: 2px solid var(--accent-color);
+        }
+
+        .cell {
+            width: 40px;
+            height: 40px;
+            background-color: #444;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            line-height: 40px;
+            font-weight: bold;
+            font-size: 18px;
+            color: var(--text-color);
+            border-radius: 5px;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+
+        .cell:hover {
+            background-color: var(--accent-color);
+            transform: scale(1.05);
+        }
+
+        .cell.mine {
+            background-color: #444;
+            color: #444;
+        }
+
+        .cell.revealed {
+            background-color: #555;
+            cursor: default;
+        }
+
+        .controls {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+
+        button, select {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 5px;
+            color: var(--background-color);
+            transition: all 0.3s ease-in-out;
+        }
+
+        button:hover, select:hover {
+            background-color: #ff784e;
+            transform: scale(1.1);
+            box-shadow: 0 0 10px var(--accent-color);
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Campo Minato</h1>
+        <div id="grid" class="grid"></div>
+        <div class="controls">
+            <select id="difficulty" onchange="startGame()">
+                <option value="sulecco">Sulecco</option>
+                <option value="easy">Facile</option>
+                <option value="medium">Medio</option>
+                <option value="hard">Difficile</option>
+                <option value="canaglia">Canaglia</option>
+            </select>
+            <button onclick="startGame()">Restart</button>
+        </div>
+    </div>
+
+    <script>
+        let gridSize;
+        let mineCount;
+        let revealedCells = 0;
+
+        const difficultySettings = {
+            sulecco: { gridSize: 2, mineCount: 1},
+            easy: { gridSize: 6, mineCount: 5 },
+            medium: { gridSize: 8, mineCount: 10 },
+            hard: { gridSize: 12, mineCount: 25 },
+            canaglia: { gridSize: 20, mineCount: 150},
+        };
+
+        function createGrid() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
+            grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
+
+            const cells = [];
+            for (let i = 0; i < gridSize * gridSize; i++) {
+                const cell = document.createElement('button');
+                cell.classList.add('cell');
+                cell.dataset.index = i;
+                cell.addEventListener('click', () => revealCell(cell, cells));
+                grid.appendChild(cell);
+                cells.push(cell);
+            }
+            placeMines(cells);
+        }
+
+        function placeMines(cells) {
+            let placedMines = 0;
+            while (placedMines < mineCount) {
+                const index = Math.floor(Math.random() * cells.length);
+                const cell = cells[index];
+                if (!cell.classList.contains('mine')) {
+                    cell.classList.add('mine');
+                    placedMines++;
+                }
+            }
+        }
+
+        function revealCell(cell, cells) {
+            if (cell.classList.contains('revealed')) return;
+            cell.classList.add('revealed');
+
+            if (cell.classList.contains('mine')) {
+                cell.textContent = '💣';
+                cell.classList.add('mine');
+                alert('Bambino siriano ha ottenuto: Granata.');
+                revealAllMines(cells);
+            } else {
+                const adjacentMines = countAdjacentMines(cell, cells);
+                cell.textContent = adjacentMines > 0 ? adjacentMines : '';
+                revealedCells++; // Increment the count of revealed cells
+
+                if (adjacentMines === 0) {
+                    revealAdjacentCells(cell, cells);
+                }
+
+                checkWin(cells); // Check if the player has won
+            }
+        }
+
+        function checkWin(cells) {
+            const totalCells = gridSize * gridSize;
+            const nonMineCells = totalCells - mineCount;
+
+            if (revealedCells === nonMineCells) {
+                alert('Sei probabilmente il Nero o il Gatto.');
+                // Optional: Reveal all remaining cells for effect
+                cells.forEach(cell => {
+                    if (!cell.classList.contains('revealed') && !cell.classList.contains('mine')) {
+                        revealCell(cell, cells);
+                    }
+                });
+            }
+        }
+
+        function countAdjacentMines(cell, cells) {
+            const index = parseInt(cell.dataset.index);
+            const neighbors = getNeighbors(index);
+            return neighbors.filter(i => cells[i].classList.contains('mine')).length;
+        }
+
+        function revealAdjacentCells(cell, cells) {
+            const index = parseInt(cell.dataset.index);
+            const neighbors = getNeighbors(index);
+            neighbors.forEach(i => revealCell(cells[i], cells));
+        }
+
+        function revealAllMines(cells) {
+            cells.forEach(cell => {
+                if (cell.classList.contains('mine')) {
+                    cell.textContent = '💣';
+                    cell.style.color = 'white';
+                    cell.style.backgroundColor = 'red';
+                }
+            });
+        }
+
+        function getNeighbors(index) {
+            const neighbors = [];
+            const row = Math.floor(index / gridSize);
+            const col = index % gridSize;
+
+            for (let r = row - 1; r <= row + 1; r++) {
+                for (let c = col - 1; c <= col + 1; c++) {
+                    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize && (r !== row || c !== col)) {
+                        neighbors.push(r * gridSize + c);
+                    }
+                }
+            }
+            return neighbors;
+        }
+
+        function startGame() {
+            const difficulty = document.getElementById('difficulty').value;
+            ({ gridSize, mineCount } = difficultySettings[difficulty]);
+            revealedCells = 0; // Reset the count when the game starts
+            createGrid();
+        }
+
+        window.onload = startGame;
+    </script>
+</body>
+</html>
