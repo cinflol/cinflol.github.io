@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mason the numbers</title>
+  <style>
+    :root {
+      --background-color: #121212;
+      --text-color: #ffffff;
+      --accent-color: #ff5722;
+    }
+
+    body {
+      font-family: Arial, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+      background-color: var(--background-color);
+      color: var(--text-color);
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    #sudoku-container {
+      display: grid;
+      grid-template-columns: repeat(9, 40px);
+      grid-template-rows: repeat(9, 40px);
+      gap: 1px;
+      background-color: #fff;
+      border: 2px solid #fff;
+    }
+
+    input {
+      width: 40px;
+      height: 40px;
+      text-align: center;
+      font-size: 18px;
+      border: 1px solid #333;
+      outline: none;
+    }
+
+    input:disabled {
+      background-color: #ccc;
+      color: #333;
+      font-weight: bold;
+    }
+
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      border: none;
+      background-color: var(--accent-color);
+      color: var(--text-color);
+      border-radius: 5px;
+    }
+
+    button:hover {
+      background-color: #e64a19;
+    }
+
+    .particle-toggle, .toggles {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      color: var(--text-color);
+      font-size: 1rem;
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+    }
+
+    .toggles {
+      top: 40px;
+    }
+
+    .changelog {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background-color: rgba(0, 0, 0, 0.7);
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 300px;
+      color: var(--text-color);
+    }
+
+    .changelog h2 {
+      font-size: 1.5rem;
+      margin: 0;
+      margin-bottom: 10px;
+    }
+
+    .changelog ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+
+    .changelog li {
+      margin-bottom: 10px;
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>Sudoku</h1>
+  <div id="sudoku-container"></div>
+  <button onclick="startNewGame()">Riprova</button>
+
+  <script>
+    let puzzle = generatePuzzle();
+
+    function createGrid() {
+      const container = document.getElementById("sudoku-container");
+      container.innerHTML = "";
+
+      puzzle.forEach((row, rowIndex) => {
+        row.forEach((cell, colIndex) => {
+          const input = document.createElement("input");
+          input.type = "text";
+          input.maxLength = "1";
+          input.value = cell !== 0 ? cell : "";
+          input.disabled = cell !== 0;
+
+          input.addEventListener("input", () => {
+            const value = input.value;
+            if (!/^[1-9]$/.test(value)) {
+              input.value = "";
+              return;
+            }
+
+            if (!isValidInput(value, rowIndex, colIndex)) {
+              input.value = "";
+              alert("Birbantnello! Non puoi mettere quel numero li.");
+            } else {
+              checkWin();
+            }
+          });
+
+          container.appendChild(input);
+        });
+      });
+    }
+
+    function generatePuzzle() {
+      const solution = generateCompleteGrid();
+      const puzzle = JSON.parse(JSON.stringify(solution));
+
+      for (let i = 0; i < 68; i++) {
+        const row = Math.floor(Math.random() * 9);
+        const col = Math.floor(Math.random() * 9);
+        puzzle[row][col] = 0;
+      }
+
+      return puzzle;
+    }
+
+    function generateCompleteGrid() {
+      const grid = Array.from({ length: 9 }, () => Array(9).fill(0));
+      fillGrid(grid);
+      return grid;
+    }
+
+    function fillGrid(grid) {
+      for (let row = 0; row < 9; row++) {
+        for (let col = 0; col < 9; col++) {
+          if (grid[row][col] === 0) {
+            const numbers = shuffleArray([1, 2, 3, 4, 5, 6, 7, 8, 9]);
+
+            for (const num of numbers) {
+              if (isValidPlacement(grid, row, col, num)) {
+                grid[row][col] = num;
+
+                if (fillGrid(grid)) {
+                  return true;
+                }
+
+                grid[row][col] = 0;
+              }
+            }
+
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function isValidPlacement(grid, row, col, num) {
+      if (grid[row].includes(num)) return false;
+      if (grid.some(r => r[col] === num)) return false;
+
+      const startRow = Math.floor(row / 3) * 3;
+      const startCol = Math.floor(col / 3) * 3;
+
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (grid[startRow + i][startCol + j] === num) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function isValidInput(value, row, col) {
+      const num = parseInt(value, 10);
+      if (puzzle[row].includes(num)) return false;
+      if (puzzle.some(r => r[col] === num)) return false;
+
+      const startRow = Math.floor(row / 3) * 3;
+      const startCol = Math.floor(col / 3) * 3;
+
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (puzzle[startRow + i][startCol + j] === num) return false;
+        }
+      }
+
+      return true;
+    }
+
+    function shuffleArray(array) {
+      for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [array[i], array[j]] = [array[j], array[i]];
+      }
+      return array;
+    }
+
+    function checkWin() {
+        const inputs = document.querySelectorAll("#sudoku-container input");
+        const values = Array.from(inputs).map(input => parseInt(input.value, 10) || 0);
+
+        let solved = true;
+        for (let i = 0; i < 9; i++) {
+            for (let j = 0; j < 9; j++) {
+            // Only check positions where the puzzle has a non-zero value
+            if (puzzle[i][j] !== 0 && values[i * 9 + j] !== puzzle[i][j]) {
+                solved = false;
+                break;
+            }
+            }
+        }
+
+        if (solved) {
+            alert("Complimenti Mason per aver compreso cosa significavano i numeri.");
+            window.location.href = "./mine-icon.png";
+        }
+    }
+
+
+    function startNewGame() {
+      puzzle = generatePuzzle();
+      createGrid();
+    }
+
+    window.onload = createGrid;
+  </script>
+</body>
+</html>

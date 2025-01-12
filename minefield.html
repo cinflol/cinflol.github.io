@@ -191,7 +191,6 @@
 
             if (revealedCells === nonMineCells) {
                 alert('Sei probabilmente il Nero o il Gatto.');
-                // Optional: Reveal all remaining cells for effect
                 cells.forEach(cell => {
                     if (!cell.classList.contains('revealed') && !cell.classList.contains('mine')) {
                         revealCell(cell, cells);
