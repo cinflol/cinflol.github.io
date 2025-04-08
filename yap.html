@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yap Yap</title>
+  <link rel="stylesheet" href="styles.css">
+  <style>
+    /* Stili base che hai fornito */
+    :root {
+      --background-color: #121212;
+      --text-color: #ffffff;
+      --accent-color: #ff5722;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-family: 'Arial', sans-serif;
+      overflow-x: hidden;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      transition: background-color 0.5s ease;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+      opacity: 0;
+      transition: opacity 1s ease-in-out;
+    }
+
+    .container {
+      text-align: center;
+      animation: fadeIn 2s ease-in-out;
+      padding: 20px;
+      max-width: 800px;
+      width: 100%;
+    }
+
+    .title {
+      font-size: 4rem;
+      margin: 0;
+      animation: slideDown 1s ease-out;
+    }
+
+    /* Stile per il menu a tendina */
+    .accordion {
+      background-color: var(--background-color);
+      color: var(--text-color);
+      cursor: pointer;
+      padding: 18px;
+      width: 100%;
+      border: 1px solid var(--accent-color);
+      text-align: left;
+      outline: none;
+      font-size: 1.2rem;
+      transition: 0.4s;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .active, .accordion:hover {
+      background-color: var(--accent-color);
+    }
+
+    /* Contenuto nascosto inizialmente */
+    .panel {
+      color: var(--text-color);
+      padding: 0 18px;
+      display: none;
+      overflow: hidden;
+      background-color: #333;
+      border-left: 2px solid var(--accent-color);
+      margin-bottom: 10px;
+    }
+
+    .panel p {
+      margin: 15px 0;
+    }
+
+    /* Animazione di fade-in per il contenuto */
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes slideDown {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+  </style>
+</head>
+<body>
+  
+  <canvas id="particles"></canvas>
+  
+  <div class="container">
+    <header>
+      <h1 class="title">Consiglio, Tutorial e Scelte v0.1</h1>
+      <p>Scrivo un paio di cose che so che vi potrebbero aiutare/servire, o che sono interessanti</p>
+      <p>Parte della mia conoscenza online.</p>
+    </header>
+
+    <!-- Menu a tendina -->
+    <button class="accordion">Come bypassare il blocco del network sui computer scolastici</button>
+    <div class="panel">
+      <p>Prima cosa che vogliamo è un filo usb c-c o usb a-c, in quanto non tutti i computer hanno i componenti necessari per non aver bisogno di questo filo.</p>
+      <p>Metodo Senza Cavo: Sintetizzato, andremo a sostituire la connessione del computer con l'hotspot del nostro telefono, che credo tutti voi sappiate fare.</p>
+      <p>Metodo Con Cavo:Spesso però non è sempre supportato su tutti i pc scolastici, in questo ci servira il filo prima menzionato. Vogliamo rimuovere il cavo ethernet da dietro il nostro computer, il filo che Angelino piace tanto rimuovere, in modo che il network scolastico (e il blocco su esso) non ci possa dare problemi. Poi vogliamo collegare il nostro telefono al computer tramite il cavo, andare sulle impostazioni del nostro telefolo e sotto la voce hotspot mobile, ci dovrebbe essere la voce Tethering USB, attivatela.</p>
+      <p>Quale Metodo Scelgo? Per controllare se il computer supporta hotspot, andate sull'icona che sembra una notifica, e se c'è l'opzione "Rete", apritela e controllate se ci sono WiFi scolastici, se ci sono potrete avviare l'hotspot dal vostro telefono come fareste per fare hotspot a un vostro amico; se invece non ci sono wifi a cui tentare connessione o la voce "Rete" non c'è dovrete per forza usare il metodo col cavo</p>
+    </div>
+
+    <button class="accordion">Hostare la propria intelligenza artificiale sul proprio telefono</button>
+    <div class="panel">
+        <p>Questo tutorial sarà solo su android per ovvi motivi (fanculo apple)</p>
+        <p>Che significa e perché dovrei farlo? Spesso noi utilizziamo servizi di intelligenza artificiale per domande o spiegazioni, per funzionare questi servizi mandano il vostro messaggio a un server esterno che vi darà poi risposta. Il problema è che questi servizi sono stati sgamati a conservare conversazioni e messaggi, e il servizio potrebbe essere rimosso ad ogni momento, ed ovviamente c'è bisogno di una connessione per accedere a questi servizi. Per questo se attendere un pochino in più non è un problema, e hai un telefono piuttosto recente, ti consiglio di seguire questa guida</p>
+        <p>Quale app dovrei installare? Ho trovato questa applicazione chiamata "PocketPal", e fin ora è la migliore che ho trovato. La potete trovare facilmente sul Play Store. Una volta installata, apritela e andate sulla voce "Models", qui vederete vari modelli che l'app consiglia. Andrò in dettaglio dopo su quali scegliere. Una volta scelto il vostro modello andate sulla voce "Chat" e clickate "Select Model", scegliete il modello che preferite, e dopo un momento vi lascerà parlare con esso.</p>
+        <p>Quali modelli scegliere? Dipende molto da quello che ti serve, consiglio "Gemma 2-2b-it" per risposte veloci e può essere usato su quasi ogni telefono, vari modelli di Qwen2.5 per programmazione e supporto completo di varie lingue, Llama3.2 o Llama 3.1 o Llama 3.3 per servizi generali (il numero vicino alla "b" ad esempio "1.5b" o "2b" sono i parametri su cui è addestrato, più è grande più sarà preciso, ma sarà anche più pesante e più lento e potrebbe non funzionare su telefoni più vecchi), "DeepSeek R1 Distill Qwen 1.5b uncensored" per raggionamenti e completa libertà col bot, "DeepSeek R1 Distill Qwen 1.5" per raggionamenti, Gemma 2 9b (se il vostro telefono ve lo permette) per raggionamenti e più precise informazioni. Se non trovate alcuni di questi modelli, è perché alcuni si trovano nel menu di "Models", clicka su +, su "Add from Hugging Face" e li potete cercare tutti i modelli che volete.</p>
+        <p>Problemi: la velocità di risposta è completamente dipendente dal vostro telefono, io consiglierei modelli 1.5b e 2b per tutti, mentre modelli 7b e 9b per telefoni più recenti/potenti. Non proverei nemmeno a cercare modelli di generazioni di immagini, in quanto richiedono fin troppe risorse per un telefono. Informazioni potrebbero essere sbagliate se il vostro modello "ha una b bassa" e gli chiedete cose fin troppo specifiche.</p>
+    </div>
+
+    <button class="accordion">intelligenze artificiali da usare</button>
+    <div class="panel">
+        <p>Generalmente se state da un computer scolastico, molti di questi servizi sono bloccati, quindi vi consiglio di sbloccarli tramite il tutorial precedente.</p>
+        <p>Copilot: accessibile tramite Bing, basato (attualmente) su GPT-4/4o, non ha un modello open source</p>
+        <p>DeepSeek: modello R1 per raggionamenti e V3 per programmazione o informazioni precise, open source dalla nascita</p>
+        <p>ChatGPT: classico, richiede un account, non c'è bisogno di una presentazione, non ha un modello open source che può essere hostato localmente</p>
+        <p>Qwen2.5: modello Max per programmazione, il resto hanno spiegazioni che puoi leggere prima di selezionarli, alcuni dei modelli possono generare immagini e il modello Max può generare video richiede un account, tutti i modelli tranne il modello MAX sono open source.</p>
+        <p>Gemini: modello di Google, parzialmente addestrato su commenti di Reddit quindi può dare risposte un pò freaky, ma generalmente molto buono ed è accessibile di base su molti telefoni android spesso rimpiazzando google assistant, ha un modello open source chiamato Gemma</p>
+        <p>Llama: per domande generali, da Meta, open source per eccellenza</p>
+        <p>Phi-4: per raggionamenti, da Microsoft, leggero, ha un modello open source</p>
+        <p>DeepSite: versione custom ed open source (forzato dalla licenza di DeepSeek) di DeepSeek, ottimizzato per creare siti, accessibile tramite Hugging Face.</p>
+    </div>
+
+    <button class="accordion">Quali VPN sono sicure da usare</button>
+    <div class="panel">
+        <p>Le VPN sono molto utili per rendere la navigaizone online più sicura, almeno in teoria, ma non tutte le VPN sono uguali, e alcune sarebbe meglio non usare.</p>
+        <p>Perché usare una VPN? Anche se non lo ammettono, ci sono agenzie (Fanculo l'agcom) che il loro intero lavoro è tenere l'internet "sicuro" (che io preferisco chiamare censura), bloccando l'accesso a livello nazionale di certi siti, in Italia questa agenzia è per nostra grande sfortuna l'AGCOM. Una misura per rendere internet sicuro secondo loro è quello che loro chiamano "Piracy Shield", in teoria è una buona idea, prevenire pirateria è na cosa positiva, ma il metodo con cui lo hanno fatto è la più grande cazzata mai vista, che forza le mani della agcom stessa a bloccare siti reportati da AGENZIE PRIVATE (le agenzie ammesse sono principalmente ISP, tipo Vodafone e TIM, oppure fornitori di servizi calcistici, principalemten DAZN e Sky) in 30 MINUTI CON MINIMO CONTROLLO. Non credo devo spiegare perché dare praticamente il potere a delle agenzie private su quali siti bloccare a livello nazionale sia sbagliato, senza report pubblici, hanno rimosso la lista dei siti bloccati per qualche motivo. In teoria dovrebbe bloccare un sito, ma a causa del modo in cui vengono hostati i siti sulle vps, blocca le intere vps, quindi in pratica per bloccare un sito di pirateria, Piracy Shield blocca altri 200 siti (che potrebbero essere di piccole aziende, un bar o un blog) che non c'entravano niente col sito di pirateria senza neanche un avviso. Questo è inaccettabile. L'intero codice+manuali+backend di Piracy shield è stato leakato, è completa merda, Polito potrebbe fare qualcosa di meglio, lo potete trovare facilmente su <a href="https://github.com/fuckpiracyshield">GitHub</a>. Tutto questo può essere bypassato cambiando impostazioni DNS (una cosa estremamente semplice) o una VPN, ma dobbiamo scegliere quella giusta, andiamo a vedere le nostre opzioni.</p>
+        <p>Mullvad VPN/Browser: Senza dubbio la migliore su ogni cosa, non hai un account, non mantiene log (che possono essere tracciati se tenuti), costa poco, non mantiene dati di transazioni, accetta crypto, ACCETTA CONTANTI e il browser (con vpn inclusa) è gratis, la vpn è disponibile anche su mobile (sia android che ios), macos e linux. Senza dubbio la miglior VPN possibile.</p>
+        <p>NordVPN: Fornisce log al governo sotto richiesta anche se afferma di non salvare log, molto popolare, basso prezzo.</p>
+        <p>Surfshark: Veloce, prezzi molto competitivi, salva pochi log e negli anni precedenti li ha forniti ai governi.</p>
+        <p>Qualsiasi vpn gratuita: No, la peggior cosa in esistenza, se un servizio è gratuito allora sei tu il servizio, molte di queste vpn sono state beccate a usare dispositivi che la utilizzavano per una botnet, e/o vendere i dati generati.</p>
+    </div>
+    
+    <button class="accordion">Rimuovere pubblicità</button>
+    <div class="panel">
+        <p>Le pubblicità sono diventate troppo invasive, persistenti e inpertinenti, stesso su youtube si possono trovare pubblicità indesiderate e inadatte, spesso mi è capitato di avere una tizia essere scopata mentre guardavo un video su Youtube. Il colmo per me fu quando volevo ascoltare della musica, 2 pubblicità da 30 secondi l'una, cambio idea e voglio un'altra canzone e altre 2 pubblicità mi appaiono. Ecco come puoi rimuovere anche tu gran parte se non tutte le pubblicità in generale.</p>
+        <h3>Android:</h3>
+        <p>DNS: molte pubblicità possono essere bloccate tramite dei servizi gratuiti di DNS, entrate nelle vostre impostazioni di DNS e sostituite Automatico con "dns.adguard.com", questo bloccherà gran parte delle pubblicità nella navigazione. Bloccando anche però alcuni siti conosciuti per essere maligni, e alcune pubblicità in app. Questo può causare problemi su ...certi siti un pò più 18+... e su alcune applicazioni. Non funziona su YouTube.</p>
+        <p>ReVanced: Le migliori mod per apk che si possono trovare, aggiungendo QOL features e rimuovendo pubblicità, installando il ReVanced Manager si ha accesso a varie applicazioni, tra cui Youtube Revanced (io consiglio la versione "RVX YT Extended"), Revanced Spotify, Revanced Duolingo, ReVanced Photomath (photomath premium) e tante altre. Credo sia uno dei servizi più utili. Tutte le applicazioni sono open source</p>
+        
+        <h3>PC:</h3>
+        <p>Include Windows e Linux</p>
+        <p>Browser: prima cosa consiglio di installare browser come waterfox se ci si vuole allontanare dalla sfera di google, o se non ci si vuole allontanare troppo installare Brave. se si va con waterfox (o qualsiasi browser basato su Firefox) installare l'estenzione uBlock Origin. Invece Brave ha un adblocker già integrato.</p>
+        
+        <h3>Ios:</h3>
+        <p>No</p>
+    </div>
+
+  </div>
+
+  <script>
+    // JavaScript per gestire il comportamento del menu a tendina
+    var acc = document.getElementsByClassName("accordion");
+    for (var i = 0; i < acc.length; i++) {
+      acc[i].addEventListener("click", function() {
+        // Alterna la classe "active" e mostra/nasconde il contenuto
+        this.classList.toggle("active");
+        var panel = this.nextElementSibling;
+        if (panel.style.display === "block") {
+          panel.style.display = "none";
+        } else {
+          panel.style.display = "block";
+        }
+      });
+    }
+  </script>
+  
+</body>
+</html>

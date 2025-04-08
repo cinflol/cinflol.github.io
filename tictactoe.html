@@ -1,20 +1,226 @@
-<!--Tris singleplayer perché non so come fare il bot e sono schizofrenico e sento voci, con queste voci io gioco a tris, tris mi tiene compagnia, gioca anche tu a tris-->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Tic Tac Toe</title>
-  <link rel="stylesheet" href="ticTacToe.css">
+  <style>
+    :root {
+      --background-color: #121212;
+      --text-color: #ffffff;
+      --accent-color: #ff5722;
+    }
+
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: var(--background-color);
+      color: var(--text-color);
+      font-family: 'Arial', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+    }
+
+    .game-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 20px;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      grid-template-rows: repeat(3, 100px);
+      gap: 5px;
+      margin-bottom: 20px;
+    }
+
+    .board div {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background-color: var(--background-color);
+      border: 2px solid var(--accent-color);
+      color: var(--text-color);
+      font-size: 2rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    .board div:hover {
+      background-color: var(--accent-color);
+    }
+
+    button {
+      padding: 10px 20px;
+      border: none;
+      background-color: var(--accent-color);
+      color: var(--background-color);
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    button:hover {
+      background-color: #ff3d00;
+    }
+
+    #gameStatus {
+      font-size: 1.2rem;
+      margin-top: 20px;
+    }
+  </style>
 </head>
 <body>
   <div class="game-container">
     <h1>Tic Tac Toe</h1>
     <div id="board" class="board"></div>
     <button id="resetButton">Reset Game</button>
-    <p id="gameStatus">Player X's turn</p>
+    <p id="gameStatus">Your turn (X)</p>
   </div>
 
-  <script src="ticTacToe.js"></script>
+  <script>
+    const board = document.getElementById('board');
+    const resetButton = document.getElementById('resetButton');
+    const gameStatus = document.getElementById('gameStatus');
+
+    let boardState = ['', '', '', '', '', '', '', '', '']; // Empty board
+    let currentPlayer = 'X'; // Player is always 'X', Bot is always 'O'
+    let gameActive = true;
+
+    // Create the board dynamically
+    function createBoard() {
+      board.innerHTML = '';
+      boardState.forEach((cell, index) => {
+        const cellDiv = document.createElement('div');
+        cellDiv.classList.add('cell');
+        cellDiv.textContent = cell;
+        cellDiv.addEventListener('click', () => handleCellClick(index));
+        board.appendChild(cellDiv);
+      });
+    }
+
+    // Handle a cell click (mark the cell and check for a winner)
+    function handleCellClick(index) {
+      if (boardState[index] !== '' || !gameActive || currentPlayer !== 'X') return; // Cell is already filled or the game is over
+
+      // Mark the cell with 'X' (player's move)
+      boardState[index] = 'X';
+      gameStatus.textContent = "Turno dello stronzo (O)";
+      checkWinner();
+
+      // If the game is still active, let the bot play
+      if (gameActive) {
+        setTimeout(makeBotMove, 500); // Add a slight delay for the bot's move
+      }
+
+      createBoard();
+    }
+
+    // Check if a player has won or if the game is a draw
+    function checkWinner() {
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6], // Diagonals
+      ];
+
+      for (const [a, b, c] of winningCombinations) {
+        if (boardState[a] && boardState[a] === boardState[b] && boardState[a] === boardState[c]) {
+          gameStatus.textContent = `${boardState[a]} vincitore di questo grandissimo cazzo!`;
+          gameActive = false;
+          return;
+        }
+      }
+
+      // Check for a draw (no empty cells left)
+      if (!boardState.includes('')) {
+        gameStatus.textContent = "PAREGGIO RICCHIONE!";
+        gameActive = false;
+      }
+    }
+
+    // Reset the game
+    function resetGame() {
+      boardState = ['', '', '', '', '', '', '', '', ''];
+      currentPlayer = 'X';
+      gameActive = true;
+      gameStatus.textContent = "il tuo turno muovi il culo giagro (X)";
+      createBoard();
+    }
+
+    // Bot logic
+    function makeBotMove() {
+      if (!gameActive) return;
+
+      let bestMove = -1;
+
+      // Priority 1: Find a winning move for the bot
+      bestMove = findWinningMove('O');
+      if (bestMove !== -1) {
+        boardState[bestMove] = 'O';
+        checkWinner();
+        updateGameStatus();
+        return;
+      }
+
+      // Priority 2: Block the player's winning move
+      bestMove = findWinningMove('X');
+      if (bestMove !== -1) {
+        boardState[bestMove] = 'O';
+        checkWinner();
+        updateGameStatus();
+        return;
+      }
+
+      // Priority 3: Choose a random available cell
+      const availableCells = boardState
+        .map((cell, index) => (cell === '' ? index : -1))
+        .filter(index => index !== -1);
+
+      if (availableCells.length > 0) {
+        const randomIndex = Math.floor(Math.random() * availableCells.length);
+        bestMove = availableCells[randomIndex];
+        boardState[bestMove] = 'O';
+        checkWinner();
+        updateGameStatus();
+      }
+    }
+
+    // Helper function to find a winning move for a given player
+    function findWinningMove(player) {
+      const winningCombinations = [
+        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+        [0, 4, 8], [2, 4, 6], // Diagonals
+      ];
+
+      for (const [a, b, c] of winningCombinations) {
+        if (boardState[a] === player && boardState[b] === player && boardState[c] === '') return c;
+        if (boardState[a] === player && boardState[c] === player && boardState[b] === '') return b;
+        if (boardState[b] === player && boardState[c] === player && boardState[a] === '') return a;
+      }
+
+      return -1; // No winning move found
+    }
+
+    // Update the game status after the bot's move
+    function updateGameStatus() {
+      if (gameActive) {
+        gameStatus.textContent = "Your turn (X)";
+      }
+      createBoard();
+    }
+
+    resetButton.addEventListener('click', resetGame);
+
+    // Initialize the board when the page loads
+    createBoard();
+  </script>
 </body>
 </html>

@@ -3,12 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>w3school</title><!--sfondo nero come la persona che mi ha chiesto questo giochino-->
-    <style> 
-        :root { 
+    <title>Campo Minato</title>
+    <style>
+        :root {
             --background-color: #121212;
             --text-color: #ffffff;
             --accent-color: #ff5722;
+            --mine-color: #ff0000;
+            --revealed-color: #555;
         }
 
         body {
@@ -49,7 +51,7 @@
             line-height: 40px;
             font-weight: bold;
             font-size: 18px;
-            color: var(--text-color);
+            color: transparent; /* Nascondi il testo delle celle */
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
@@ -59,14 +61,15 @@
             transform: scale(1.05);
         }
 
-        .cell.mine {
-            background-color: #444;
-            color: #444;
+        .cell.revealed {
+            background-color: var(--revealed-color);
+            cursor: default;
+            color: var(--text-color); /* Mostra il testo solo per le celle rivelate */
         }
 
-        .cell.revealed {
-            background-color: #555;
-            cursor: default;
+        .cell.mine.revealed {
+            background-color: var(--mine-color);
+            color: white;
         }
 
         .controls {
@@ -114,23 +117,23 @@
                 <option value="easy">Facile</option>
                 <option value="medium">Medio</option>
                 <option value="hard">Difficile</option>
-                <option value="canaglia">Canaglia</option>
+                <option value="canaglia">CANAGLIA</option>
+                <option value="masmla">Masmla</option>
             </select>
             <button onclick="startGame()">Restart</button>
         </div>
     </div>
 
     <script>
-        let gridSize;
-        let mineCount;
-        let revealedCells = 0;
+        let gridSize, mineCount, revealedCells = 0;
 
         const difficultySettings = {
-            sulecco: { gridSize: 2, mineCount: 1},
+            sulecco: { gridSize: 2, mineCount: 1 },
             easy: { gridSize: 6, mineCount: 5 },
             medium: { gridSize: 8, mineCount: 10 },
             hard: { gridSize: 12, mineCount: 25 },
-            canaglia: { gridSize: 20, mineCount: 150},
+            canaglia: { gridSize: 20, mineCount: 60 },
+            masmla: { gridSize: 60, mineCount: 650 },
         };
 
         function createGrid() {
@@ -152,37 +155,43 @@
         }
 
         function placeMines(cells) {
-            let placedMines = 0;
-            while (placedMines < mineCount) {
-                const index = Math.floor(Math.random() * cells.length);
-                const cell = cells[index];
-                if (!cell.classList.contains('mine')) {
-                    cell.classList.add('mine');
-                    placedMines++;
-                }
+            const totalCells = gridSize * gridSize;
+            const mineIndices = new Set();
+
+            while (mineIndices.size < mineCount) {
+                const index = Math.floor(Math.random() * totalCells);
+                mineIndices.add(index);
             }
+
+            mineIndices.forEach(index => {
+                cells[index].classList.add('mine');
+            });
         }
 
         function revealCell(cell, cells) {
             if (cell.classList.contains('revealed')) return;
+
             cell.classList.add('revealed');
 
             if (cell.classList.contains('mine')) {
                 cell.textContent = '💣';
-                cell.classList.add('mine');
-                alert('Bambino siriano ha ottenuto: Granata.');
+                alert('Bambino Siriano ha trovato un oggetto:');
+                alert('Ak-47 arrugginito');
+                disableAllCells(cells); // Disabilita tutte le celle
                 revealAllMines(cells);
-            } else {
-                const adjacentMines = countAdjacentMines(cell, cells);
-                cell.textContent = adjacentMines > 0 ? adjacentMines : '';
-                revealedCells++; // Increment the count of revealed cells
-
-                if (adjacentMines === 0) {
-                    revealAdjacentCells(cell, cells);
-                }
-
-                checkWin(cells); // Check if the player has won
+                return;
             }
+
+            revealedCells++;
+
+            const adjacentMines = countAdjacentMines(cell, cells);
+            cell.textContent = adjacentMines > 0 ? adjacentMines : '';
+
+            if (adjacentMines === 0) {
+                revealAdjacentCells(cell, cells);
+            }
+
+            checkWin(cells);
         }
 
         function checkWin(cells) {
@@ -190,7 +199,7 @@
             const nonMineCells = totalCells - mineCount;
 
             if (revealedCells === nonMineCells) {
-                alert('Sei probabilmente il Nero o il Gatto.');
+                alert('Hai vinto!');
                 cells.forEach(cell => {
                     if (!cell.classList.contains('revealed') && !cell.classList.contains('mine')) {
                         revealCell(cell, cells);
@@ -214,9 +223,8 @@
         function revealAllMines(cells) {
             cells.forEach(cell => {
                 if (cell.classList.contains('mine')) {
+                    cell.classList.add('revealed');
                     cell.textContent = '💣';
-                    cell.style.color = 'white';
-                    cell.style.backgroundColor = 'red';
                 }
             });
         }
@@ -228,7 +236,7 @@
 
             for (let r = row - 1; r <= row + 1; r++) {
                 for (let c = col - 1; c <= col + 1; c++) {
-                    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize && (r !== row || c !== col)) {
+                    if (r >= 0 && r < gridSize && c >= 0 && c < gridSize && !(r === row && c === col)) {
                         neighbors.push(r * gridSize + c);
                     }
                 }
@@ -236,10 +244,17 @@
             return neighbors;
         }
 
+        function disableAllCells(cells) {
+            cells.forEach(cell => {
+                cell.disabled = true; // Disabilita tutte le celle
+                cell.style.cursor = 'not-allowed'; // Cambia il cursore per indicare che le celle sono disabilitate
+            });
+        }
+
         function startGame() {
             const difficulty = document.getElementById('difficulty').value;
             ({ gridSize, mineCount } = difficultySettings[difficulty]);
-            revealedCells = 0; // Reset the count when the game starts
+            revealedCells = 0;
             createGrid();
         }
 
