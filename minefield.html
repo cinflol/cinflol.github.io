@@ -12,27 +12,26 @@
             --mine-color: #ff0000;
             --revealed-color: #555;
         }
-
         body {
             margin: 0;
             height: 100vh;
             background-color: var(--background-color);
             color: var(--text-color);
             font-family: 'Arial', sans-serif;
-            overflow: hidden;
             display: flex;
             justify-content: center;
             align-items: center;
             flex-direction: column;
         }
-
         .game-container {
+            max-width: 90vw; /* Larghezza massima del contenitore */
+            max-height: 80vh; /* Altezza massima del contenitore */
+            overflow: auto; /* Abilita lo scrolling */
             display: flex;
             flex-direction: column;
             align-items: center;
             animation: fadeIn 2s ease-in-out;
         }
-
         .grid {
             display: grid;
             gap: 2px;
@@ -40,7 +39,6 @@
             padding: 5px;
             border: 2px solid var(--accent-color);
         }
-
         .cell {
             width: 40px;
             height: 40px;
@@ -55,29 +53,29 @@
             border-radius: 5px;
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-
         .cell:hover {
             background-color: var(--accent-color);
             transform: scale(1.05);
         }
-
         .cell.revealed {
             background-color: var(--revealed-color);
             cursor: default;
             color: var(--text-color); /* Mostra il testo solo per le celle rivelate */
         }
-
         .cell.mine.revealed {
             background-color: var(--mine-color);
             color: white;
         }
-
+        .cell.flagged {
+            background-color: rgb(26, 150, 150); /* Giallo chiaro per le bandiere */
+            color: black;
+            cursor: pointer;
+        }
         .controls {
             margin-top: 20px;
             display: flex;
             gap: 10px;
         }
-
         button, select {
             padding: 10px 20px;
             font-size: 16px;
@@ -88,13 +86,11 @@
             color: var(--background-color);
             transition: all 0.3s ease-in-out;
         }
-
         button:hover, select:hover {
             background-color: #ff784e;
             transform: scale(1.1);
             box-shadow: 0 0 10px var(--accent-color);
         }
-
         @keyframes fadeIn {
             from {
                 opacity: 0;
@@ -115,6 +111,7 @@
             <select id="difficulty" onchange="startGame()">
                 <option value="sulecco">Sulecco</option>
                 <option value="easy">Facile</option>
+                <option value="rapitrice">Rapitrice</option>
                 <option value="medium">Medio</option>
                 <option value="hard">Difficile</option>
                 <option value="canaglia">CANAGLIA</option>
@@ -126,10 +123,13 @@
 
     <script>
         let gridSize, mineCount, revealedCells = 0;
+        let cells = [];
+        let isFirstClick = true;
 
         const difficultySettings = {
-            sulecco: { gridSize: 2, mineCount: 1 },
+            sulecco: { gridSize: 4, mineCount: 3 },
             easy: { gridSize: 6, mineCount: 5 },
+            rapitrice: { gridSize: 6, mineCount: 25},
             medium: { gridSize: 8, mineCount: 10 },
             hard: { gridSize: 12, mineCount: 25 },
             canaglia: { gridSize: 20, mineCount: 60 },
@@ -142,25 +142,41 @@
             grid.style.gridTemplateColumns = `repeat(${gridSize}, 1fr)`;
             grid.style.gridTemplateRows = `repeat(${gridSize}, 1fr)`;
 
-            const cells = [];
+            cells = [];
             for (let i = 0; i < gridSize * gridSize; i++) {
                 const cell = document.createElement('button');
                 cell.classList.add('cell');
                 cell.dataset.index = i;
-                cell.addEventListener('click', () => revealCell(cell, cells));
+
+                // Evento per rivelare la cella (click sinistro)
+                cell.addEventListener('click', () => revealCell(cell));
+
+                // Evento per contrassegnare la cella con una bandiera (click destro)
+                cell.addEventListener('contextmenu', (event) => {
+                    event.preventDefault(); // Impedisce il menu contestuale del browser
+                    toggleFlag(cell);
+                });
+
                 grid.appendChild(cell);
                 cells.push(cell);
             }
-            placeMines(cells);
         }
 
-        function placeMines(cells) {
+        function placeMines(excludedIndices) {
             const totalCells = gridSize * gridSize;
             const mineIndices = new Set();
 
+            // Assicurati che il numero di mine sia valido
+            if (mineCount >= totalCells - excludedIndices.size) {
+                alert("Errore: troppe mine per questa griglia!");
+                return;
+            }
+
             while (mineIndices.size < mineCount) {
                 const index = Math.floor(Math.random() * totalCells);
-                mineIndices.add(index);
+                if (!excludedIndices.has(index)) {
+                    mineIndices.add(index);
+                }
             }
 
             mineIndices.forEach(index => {
@@ -168,8 +184,15 @@
             });
         }
 
-        function revealCell(cell, cells) {
-            if (cell.classList.contains('revealed')) return;
+        function revealCell(cell) {
+            if (cell.classList.contains('revealed') || cell.classList.contains('flagged')) return;
+
+            if (isFirstClick) {
+                isFirstClick = false;
+                const safeIndex = parseInt(cell.dataset.index);
+                const excludedIndices = new Set([safeIndex, ...getNeighbors(safeIndex)]);
+                placeMines(excludedIndices);
+            }
 
             cell.classList.add('revealed');
 
@@ -184,40 +207,46 @@
 
             revealedCells++;
 
-            const adjacentMines = countAdjacentMines(cell, cells);
+            const adjacentMines = countAdjacentMines(cell);
             cell.textContent = adjacentMines > 0 ? adjacentMines : '';
 
             if (adjacentMines === 0) {
-                revealAdjacentCells(cell, cells);
+                revealAdjacentCells(cell);
             }
 
-            checkWin(cells);
+            checkWin();
         }
 
-        function checkWin(cells) {
+        function checkWin() {
             const totalCells = gridSize * gridSize;
             const nonMineCells = totalCells - mineCount;
 
-            if (revealedCells === nonMineCells) {
+            // Controlla se tutte le celle non minate sono state rivelate
+            const revealedNonMineCells = cells.filter(
+                cell => cell.classList.contains('revealed') && !cell.classList.contains('mine')
+            ).length;
+
+            // Controlla se tutte le mine sono state contrassegnate correttamente
+            const correctlyFlaggedMines = cells.filter(
+                cell => cell.classList.contains('mine') && cell.classList.contains('flagged')
+            ).length;
+
+            if (revealedNonMineCells === nonMineCells && correctlyFlaggedMines === mineCount) {
                 alert('Hai vinto!');
-                cells.forEach(cell => {
-                    if (!cell.classList.contains('revealed') && !cell.classList.contains('mine')) {
-                        revealCell(cell, cells);
-                    }
-                });
+                disableAllCells(cells); // Disabilita tutte le celle
             }
         }
 
-        function countAdjacentMines(cell, cells) {
+        function countAdjacentMines(cell) {
             const index = parseInt(cell.dataset.index);
             const neighbors = getNeighbors(index);
             return neighbors.filter(i => cells[i].classList.contains('mine')).length;
         }
 
-        function revealAdjacentCells(cell, cells) {
+        function revealAdjacentCells(cell) {
             const index = parseInt(cell.dataset.index);
             const neighbors = getNeighbors(index);
-            neighbors.forEach(i => revealCell(cells[i], cells));
+            neighbors.forEach(i => revealCell(cells[i]));
         }
 
         function revealAllMines(cells) {
@@ -251,10 +280,23 @@
             });
         }
 
+        function toggleFlag(cell) {
+            if (cell.classList.contains('revealed')) return; // Non permettere di contrassegnare celle già rivelate
+
+            if (cell.classList.contains('flagged')) {
+                cell.classList.remove('flagged');
+                cell.textContent = ''; // Rimuovi il testo della bandiera
+            } else {
+                cell.classList.add('flagged');
+                cell.textContent = '🚩'; // Aggiungi il simbolo della bandiera
+            }
+        }
+
         function startGame() {
             const difficulty = document.getElementById('difficulty').value;
             ({ gridSize, mineCount } = difficultySettings[difficulty]);
             revealedCells = 0;
+            isFirstClick = true;
             createGrid();
         }
 

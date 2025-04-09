@@ -75,45 +75,18 @@
     box-shadow: 0 0 10px var(--accent-color);
   }
 
-  .particle-toggle, .toggles {
-    position: absolute;
-    top: 10px;
-    left: 10px;
-    color: var(--text-color);
-    font-size: 1rem;
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  /* Stile per il contenitore dell'immagine */
+  .image-container {
+    display: inline-block;
+    margin-left: 20px; /* Distanza tra il canvas e l'immagine */
+    vertical-align: top; /* Allinea l'immagine in alto rispetto al canvas */
   }
 
-  .toggles {
-    top: 40px;
-  }
-
-  .changelog {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding: 20px;
-    border-radius: 10px;
-    max-width: 300px;
-    color: var(--text-color);
-  }
-
-  .changelog h2 {
-    font-size: 1.5rem;
-    margin: 0;
-    margin-bottom: 10px;
-  }
-
-  .changelog ul {
-    list-style-type: none;
-    padding-left: 0;
-  }
-
-  .changelog li {
-    margin-bottom: 10px;
+  .image-container img {
+    max-width: 300px; /* Dimensione massima dell'immagine */
+    height: auto; /* Mantieni le proporzioni */
+    border: 2px solid var(--accent-color); /* Bordo per l'immagine */
+    border-radius: 5px; /* Angoli arrotondati */
   }
 
   @keyframes fadeIn {
@@ -132,7 +105,17 @@
   <div class="container">
     <h1 class="title">Tetris Game</h1>
     <p class="subtitle">Crea torri</p> <!--ma non aerei, pls-->
-    <canvas width="320" height="640" id="game"></canvas>
+    
+    <!-- Contenitore per il canvas e l'immagine -->
+    <div style="display: flex; align-items: flex-start;">
+      <canvas width="320" height="640" id="game"></canvas>
+
+      <!-- Aggiungi il contenitore per l'immagine -->
+      <div class="image-container">
+        <img src="https://www.salute33.it/wp-content/uploads/2022/01/salute33-farmaci-2.jpg" alt="Immagine Bentenal">
+      </div>
+    </div>
+
     <p id="game-over" class="game-over" style="display: none;">TORNA A FARE LEZIONE</p>
     <div class="links">
       <a href="https://cinflol.github.io/" class="link">Home</a>
@@ -149,7 +132,7 @@ function getRandomInt(min, max) {
 }
 
 function generateSequence() {
-  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z'];
+  const sequence = ['I', 'J', 'L', 'O', 'S', 'T', 'Z', 'cock'];
   while (sequence.length) {
     const rand = getRandomInt(0, sequence.length - 1);
     const name = sequence.splice(rand, 1)[0];
@@ -279,6 +262,11 @@ const tetrominos = {
     [0,1,0],
     [1,1,1],
     [0,0,0],
+  ],
+  'cock': [
+    [0,1,0],
+    [0,1,0],
+    [1,1,1],
   ]
 };
 
@@ -289,7 +277,8 @@ const colors = {
   'S': 'green',
   'Z': 'red',
   'J': 'blue',
-  'L': 'orange'
+  'L': 'orange',
+  'cock': 'brown'
 };
 
 let count = 0;

@@ -154,59 +154,85 @@
       createBoard();
     }
 
-    // Bot logic
+    // Bot logic using Minimax algorithm
     function makeBotMove() {
       if (!gameActive) return;
 
-      let bestMove = -1;
-
-      // Priority 1: Find a winning move for the bot
-      bestMove = findWinningMove('O');
-      if (bestMove !== -1) {
-        boardState[bestMove] = 'O';
-        checkWinner();
-        updateGameStatus();
-        return;
-      }
-
-      // Priority 2: Block the player's winning move
-      bestMove = findWinningMove('X');
-      if (bestMove !== -1) {
-        boardState[bestMove] = 'O';
-        checkWinner();
-        updateGameStatus();
-        return;
-      }
-
-      // Priority 3: Choose a random available cell
-      const availableCells = boardState
-        .map((cell, index) => (cell === '' ? index : -1))
-        .filter(index => index !== -1);
-
-      if (availableCells.length > 0) {
-        const randomIndex = Math.floor(Math.random() * availableCells.length);
-        bestMove = availableCells[randomIndex];
-        boardState[bestMove] = 'O';
-        checkWinner();
-        updateGameStatus();
-      }
+      const bestMove = minimax(boardState, 'O').index;
+      boardState[bestMove] = 'O';
+      checkWinner();
+      updateGameStatus();
     }
 
-    // Helper function to find a winning move for a given player
-    function findWinningMove(player) {
+    // Minimax algorithm implementation
+    function minimax(newBoard, player) {
+      const availableSpots = newBoard
+        .map((cell, index) => (cell === '' ? index : null))
+        .filter(index => index !== null);
+
+      // Base cases: check for terminal states (win, lose, draw)
+      if (checkWin(newBoard, 'X')) {
+        return { score: -10 };
+      } else if (checkWin(newBoard, 'O')) {
+        return { score: 10 };
+      } else if (availableSpots.length === 0) {
+        return { score: 0 };
+      }
+
+      const moves = [];
+
+      for (const spot of availableSpots) {
+        const move = {};
+        move.index = spot;
+        newBoard[spot] = player;
+
+        if (player === 'O') {
+          const result = minimax(newBoard, 'X');
+          move.score = result.score;
+        } else {
+          const result = minimax(newBoard, 'O');
+          move.score = result.score;
+        }
+
+        // Reset the spot to empty
+        newBoard[spot] = '';
+        moves.push(move);
+      }
+
+      // Choose the best move
+      let bestMove;
+      if (player === 'O') {
+        let bestScore = -Infinity;
+        for (const move of moves) {
+          if (move.score > bestScore) {
+            bestScore = move.score;
+            bestMove = move;
+          }
+        }
+      } else {
+        let bestScore = Infinity;
+        for (const move of moves) {
+          if (move.score < bestScore) {
+            bestScore = move.score;
+            bestMove = move;
+          }
+        }
+      }
+
+      return bestMove;
+    }
+
+    // Helper function to check if a player has won
+    function checkWin(board, player) {
       const winningCombinations = [
         [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
         [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
         [0, 4, 8], [2, 4, 6], // Diagonals
       ];
 
-      for (const [a, b, c] of winningCombinations) {
-        if (boardState[a] === player && boardState[b] === player && boardState[c] === '') return c;
-        if (boardState[a] === player && boardState[c] === player && boardState[b] === '') return b;
-        if (boardState[b] === player && boardState[c] === player && boardState[a] === '') return a;
-      }
-
-      return -1; // No winning move found
+      return winningCombinations.some(([a, b, c]) =>
+        board[a] === player && board[b] === player && board[c] === player
+      );
     }
 
     // Update the game status after the bot's move
