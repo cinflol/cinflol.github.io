@@ -5561,8 +5561,6 @@ Game.Launch=function()
 				if (!quick) quick=6;
 			}
 			desc=replaceAll('==CLOSETHIS()==','Game.CloseNote('+Game.noteId+');',desc);
-			if (Game.popups) new Game.Note(title,desc,pic,quick);
-			if (!noLog) Game.AddToLog('<b>'+title+'</b> | '+desc);
 		}
 		
 		
@@ -14164,7 +14162,6 @@ Game.Launch=function()
 		{
 			var title='Cookie Clicker';
 			if (Game.season=='fools') title='Cookie Baker';
-			document.title=(Game.OnAscend?'Ascending! ':'')+Beautify(Game.cookies)+' '+(Game.cookies==1?'cookie':'cookies')+' - '+title;
 		}
 		if (Game.T%15==0)
 		{

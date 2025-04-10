@@ -3,7 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tic Tac Toe</title>
+  <title>3 Palle o 3 Croci</title>
+  <!--Sono troppo fiero di questo codice per aggiungere easteregg-->
   <style>
     :root {
       --background-color: #121212;
@@ -89,9 +90,10 @@
     const resetButton = document.getElementById('resetButton');
     const gameStatus = document.getElementById('gameStatus');
 
-    let boardState = ['', '', '', '', '', '', '', '', '']; // Empty board
-    let currentPlayer = 'X'; // Player is always 'X', Bot is always 'O'
+    let boardState = ['', '', '', '', '', '', '', '', ''];
+    let currentPlayer = 'X';
     let gameActive = true;
+    let isProcessingMove = false; // Flag per prevenire doppi click
 
     // Create the board dynamically
     function createBoard() {
@@ -105,21 +107,25 @@
       });
     }
 
-    // Handle a cell click (mark the cell and check for a winner)
+    // Handle a cell click
     function handleCellClick(index) {
-      if (boardState[index] !== '' || !gameActive || currentPlayer !== 'X') return; // Cell is already filled or the game is over
+      if (boardState[index] !== '' || !gameActive || isProcessingMove || currentPlayer !== 'X') return;
 
-      // Mark the cell with 'X' (player's move)
+      isProcessingMove = true; // Blocca ulteriori click durante l'elaborazione
+      
       boardState[index] = 'X';
       gameStatus.textContent = "Turno dello stronzo (O)";
       checkWinner();
-
-      // If the game is still active, let the bot play
-      if (gameActive) {
-        setTimeout(makeBotMove, 500); // Add a slight delay for the bot's move
-      }
-
       createBoard();
+
+      if (gameActive) {
+        setTimeout(() => {
+          makeBotMove();
+          isProcessingMove = false; // Sblocca dopo che il bot ha mosso
+        }, 500);
+      } else {
+        isProcessingMove = false;
+      }
     }
 
     // Check if a player has won or if the game is a draw
@@ -138,7 +144,6 @@
         }
       }
 
-      // Check for a draw (no empty cells left)
       if (!boardState.includes('')) {
         gameStatus.textContent = "PAREGGIO RICCHIONE!";
         gameActive = false;
@@ -150,6 +155,7 @@
       boardState = ['', '', '', '', '', '', '', '', ''];
       currentPlayer = 'X';
       gameActive = true;
+      isProcessingMove = false;
       gameStatus.textContent = "il tuo turno muovi il culo giagro (X)";
       createBoard();
     }
@@ -162,6 +168,7 @@
       boardState[bestMove] = 'O';
       checkWinner();
       updateGameStatus();
+      createBoard();
     }
 
     // Minimax algorithm implementation
@@ -170,7 +177,6 @@
         .map((cell, index) => (cell === '' ? index : null))
         .filter(index => index !== null);
 
-      // Base cases: check for terminal states (win, lose, draw)
       if (checkWin(newBoard, 'X')) {
         return { score: -10 };
       } else if (checkWin(newBoard, 'O')) {
@@ -194,12 +200,10 @@
           move.score = result.score;
         }
 
-        // Reset the spot to empty
         newBoard[spot] = '';
         moves.push(move);
       }
 
-      // Choose the best move
       let bestMove;
       if (player === 'O') {
         let bestScore = -Infinity;
@@ -225,9 +229,9 @@
     // Helper function to check if a player has won
     function checkWin(board, player) {
       const winningCombinations = [
-        [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-        [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-        [0, 4, 8], [2, 4, 6], // Diagonals
+        [0, 1, 2], [3, 4, 5], [6, 7, 8],
+        [0, 3, 6], [1, 4, 7], [2, 5, 8],
+        [0, 4, 8], [2, 4, 6],
       ];
 
       return winningCombinations.some(([a, b, c]) =>
@@ -240,7 +244,6 @@
       if (gameActive) {
         gameStatus.textContent = "Your turn (X)";
       }
-      createBoard();
     }
 
     resetButton.addEventListener('click', resetGame);

@@ -78,15 +78,15 @@
   /* Stile per il contenitore dell'immagine */
   .image-container {
     display: inline-block;
-    margin-left: 20px; /* Distanza tra il canvas e l'immagine */
-    vertical-align: top; /* Allinea l'immagine in alto rispetto al canvas */
+    margin-left: 20px;
+    vertical-align: top;
   }
 
   .image-container img {
-    max-width: 300px; /* Dimensione massima dell'immagine */
-    height: auto; /* Mantieni le proporzioni */
-    border: 2px solid var(--accent-color); /* Bordo per l'immagine */
-    border-radius: 5px; /* Angoli arrotondati */
+    max-width: 300px;
+    height: auto;
+    border: 2px solid var(--accent-color);
+    border-radius: 5px;
   }
 
   @keyframes fadeIn {
@@ -182,10 +182,14 @@ function isValidMove(matrix, cellRow, cellCol) {
 }
 
 function placeTetromino() {
+  if (isPlacing) return;
+  isPlacing = true;
+
   for (let row = 0; row < tetromino.matrix.length; row++) {
     for (let col = 0; col < tetromino.matrix[row].length; col++) {
       if (tetromino.matrix[row][col]) {
         if (tetromino.row + row < 0) {
+          isPlacing = false;
           return showGameOver();
         }
         playfield[tetromino.row + row][tetromino.col + col] = tetromino.name;
@@ -206,6 +210,7 @@ function placeTetromino() {
   }
 
   tetromino = getNextTetromino();
+  isPlacing = false;
 }
 
 function showGameOver() {
@@ -282,21 +287,21 @@ const colors = {
 };
 
 let count = 0;
-let speed = 20; // Starting speed (lower means faster)
+let speed = 20;
 let tetromino = getNextTetromino();
 let rAF;
 let gameOver = false;
 let elapsedTime = 0;
+let isPlacing = false;
 
 function loop() {
   rAF = requestAnimationFrame(loop);
   context.fillStyle = '#121212';
   context.fillRect(0, 0, canvas.width, canvas.height);
 
-  // Update the speed every second
   elapsedTime++;
   if (elapsedTime % 1000 === 0) {
-    if (speed > 5) {  // Don't go too fast
+    if (speed > 5) {
       speed--;
     }
   }
@@ -313,7 +318,7 @@ function loop() {
   if (gameOver) return;
 
   count++;
-  if (count % speed === 0) {  // Adjust game speed by controlling how often the tetromino moves down
+  if (count % speed === 0 && !isPlacing) {
     tetromino.row++;
     if (!isValidMove(tetromino.matrix, tetromino.row, tetromino.col)) {
       tetromino.row--;
@@ -332,7 +337,7 @@ function loop() {
 }
 
 document.addEventListener('keydown', (e) => {
-  if (gameOver) return;
+  if (gameOver || isPlacing) return;
 
   if (e.key === 'ArrowLeft') {
     if (isValidMove(tetromino.matrix, tetromino.row, tetromino.col - 1)) {
