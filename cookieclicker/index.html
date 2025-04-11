@@ -22,6 +22,18 @@ Feel free to alter this code to your liking, but please do not re-host it, do no
 <link href='https://fonts.googleapis.com/css?family=Merriweather:900&subset=latin,latin-ext' rel='stylesheet' type='text/css'>
 <script src="base64.js"></script>
 <script src="main.js"></script>
+<script>
+	document.addEventListener('keydown', function(event) {
+    if (event.key.toLowerCase() === 'h') {
+        const newWindow = window.open('https://www.w3schools.com/cpp/cpp_files.asp', '_blank');
+        if (newWindow) {
+            window.close();
+        } else {
+            alert('Impossibile aprire w3schools. Potrebbe essere bloccato dal popup blocker.');
+        }
+    }
+});
+</script>
 <link href="style.css" rel="stylesheet" type="text/css">
 </head>
 <body>

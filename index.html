@@ -74,9 +74,9 @@
   <div class="changelog">
     <h2>Changelog</h2>
     <ul>
-      <li><strong>v1.5.1: </strong>Aggiunti easteregg (alcuni presenti anche mentre si gioca) e altri siti. VERSIONE FATTA VELOCEMENTE E PRINCIPALMENTE PER RISOLVERE BUG</li>
-      <li><strong>Aggiunti: migliorato il bot per tris (rimozione bug), versione finale di sudoku, varie immagini, aggiunto tutorial per nascondere l'uso di intelligenza artificiale in testi nella pagina <a href="./yap.html">Yap Yappity Yap Yap</a>, aggiunto Capitalismo, aggiunto Business napoletano medio e tantissimi easteregg (anche nei giochi)</strong></li>
-    <li><strong>Spostati in locale:</strong>FNF, molestato dalle nonne, surfisti della Metropolitana</li>
+      <li><strong>v1.5.2: </strong>Aggiunti easteregg e sistema di sicurezza in caso di supervisione (premete h)</li>
+      <li><strong>Aggiunti: 21 parole chiave, più easteregg nei giochi e sistema di sicurezza a tutte le pagine</strong></li>
+    <li><strong>Spostati in locale:</strong> sto cazzo</li>
 	  <li><strong>In speranza:</strong>piccoli rpg e tanti piccoli segreti.</li>
     <li><strong>Ringraziamenti speciali:</strong>Massimiliano/Salvatore/Nello/Pietro per feedback, Daniele per immagini.</li>
 	  <!--Abbiamo scoperto fossili di evidenziatori, all'inizio li avevamo scambiati per parenti di Agnello Canaglia--> 
@@ -85,11 +85,59 @@
   
   <div class="toggles">
     <label>
+      <input type="checkbox" id="toggleGravityBalls" />
       Palle
-      <img src="./nellomob.jpg" width="75" height="90">
+      <img src="./nellomob.jpg" width="60" height="70">
     </label> <!--"Yummy"-Anello Canaglia-->
+  </div>
+
+  <div class="searchbox" style="margin: 20px auto; text-align: center;">
+    <input type="text" id="keywordInput" placeholder="Scrivi una parola chiave..." style="padding: 10px; width: 250px; font-size: 16px;">
+    <button onclick="checkKeyword()" style="padding: 10px; font-size: 16px;">Vai</button>
   </div>
   
   <script src="particles.js"></script>
+  <script>
+function checkKeyword() {
+    // Ottieni il valore dell'input e convertilo in minuscolo
+    const input = document.getElementById("keywordInput").value.toLowerCase().trim();
+    
+    const encodedInput = btoa(input);
+    
+    // Cerca la corrispondenza nel keywordMap (le chiavi sono in Base64)
+    let found = false;
+    for (const [keyword, url] of Object.entries(keywordMap)) {
+        if (keyword === encodedInput) {
+            window.location.href = atob(url);
+            found = true;
+            break;
+        }
+    }
+}
+
+const keywordMap = {
+    "bWluZWNyYWZ0": "Li9lYWdsZXJjcmFmdC5odG1s",
+    "ZG9vbQ==": "aHR0cHM6Ly9jaW5mbG9sLmdpdGh1Yi5pby9qc2Rvb20=",
+    "dGV0cmlz": "dGV0cmlzLmh0bWw=",
+    "dHJpcw==": "dGljdGFjdG9lLmh0bWw=",
+    "MjA0OA==": "Z2FtZTIwNDguaHRtbA==",
+    "Zm5hZg==": "Li9mbmFmL2luZGV4Lmh0bWw=",
+    "Y29va2ll": "Li9jb29raWVjbGlja2VyL2luZGV4Lmh0bWw=",
+    "c3VyZmlzdGk=": "Li9zdWJ3YXlzdXJmZXJzL2luZGV4Lmh0bWw=",
+    "eWFw": "eWFwLmh0bWw=",
+    "bWFzbWxh": "Li9hc3NldHMvbWFzbWxhbGFsYS5qcGc=",
+    "dG9ycmUgZGkgZm9yaW8=": "Li9hc3NldHMvdG9ycmVkaWZvcmlvLmpwZw==",
+    "amVuZ2E=": "Li9hc3NldHMvamVuZ2EuanBn",
+    "dG9ycmUgbm9yZA==": "Li9hc3NldHMvamVuZ2EyLmpwZw==",
+    "YSBtaW1pcg==": "Li9hc3NldHMvYSBtaW1pci5qcGc=",
+    "c29sbyB1biBudW1lcm8=": "Li9hc3NldHMvc29sb3VubnVtZXJvLmpwZw==",
+    "YXJ0aXN0aQ==": "Li9hc3NldHMvYXJ0aXN0aS5naWY=",
+    "c2N1c2FtaSB0YW50aXNzaW1vIHNlcmVuYQ==": "Li9mbmFmL2Fzc2V0cy9zY3VzYXNlcmUubXA0",
+    "bWUgZSB1biBjYXp6byBkaSBzYWxhbWU=": "Li9mbmFmL2Fzc2V0cy91bmNhenpvZGlzYWxhbWUubXA0",
+    "c2FtdWVsZTIz": "Li9hc3NldHMvc2FtdWVsZTIzLnBuZw==",
+    "ZWZmZXR0aSBkZWxsYSBkcm9nYQ==": "Li9hc3NldHMvZWZmZXR0aWRlbGxhZHJvZ2EuanBn",
+    "Y2l1bGlvIG5vc3RhbGdpY28=": "Li9hc3NldHMvY2l1bGlvbm9zdGFsZ2ljby5qcGc="
+};
+  </script>
 </body>
 </html>

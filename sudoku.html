@@ -215,7 +215,7 @@
 <body>
   <!--Masso fare questa griglia mi ha preso tutto il pomeriggio, se ti lamenti ti sterminio la famiglia-->
   <div class="container">
-    <h1 class="title">Sudoku Game</h1>
+    <h1 class="title">Succhiodu</h1>
     <p class="subtitle">Mannaggia a Samuele</p>
 
     <div id="sudoku-container"></div>
@@ -358,7 +358,7 @@
 
         for (let i = 0; i < gridSize; i++) {
           for (let j = 0; j < gridSize; j++) {
-            if (Math.random() < 0.55) {
+            if (Math.random() < 0.275) {
               let validNumberFound = false;
               let tries = 0;
               const maxTries = 20;
@@ -481,6 +481,17 @@
     document.getElementById('reset-game').addEventListener('click', () => {
       currentGrid = createSudokuGrid();
     });
+
+    document.addEventListener('keydown', function(event) {
+    if (event.key.toLowerCase() === 'h') {
+        const newWindow = window.open('https://www.w3schools.com/cpp/cpp_files.asp', '_blank');
+        if (newWindow) {
+            window.close();
+        } else {
+            alert('Impossibile aprire w3schools. Potrebbe essere bloccato dal popup blocker.');
+        }
+    }
+});
 
     currentGrid = createSudokuGrid();
   </script>
