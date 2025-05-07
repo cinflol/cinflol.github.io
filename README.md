@@ -1,0 +1,3 @@
+Hey toto e gabriel volevate guardare il mio codice eh? ora non sarete capaci di vedere niente del codice del sito. Bitch ass nig... 
+
+andate su sito[https://cinflol.netlify.app/] se volete il sito qui succhiatemi le palle, ho tolto tutti i commit non potete neanche vedere vecchie versioni del sito
